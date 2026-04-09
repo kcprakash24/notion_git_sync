@@ -80,6 +80,8 @@ layout: PostSimple
 2. Click `...` menu (top right) → **Connections**
 3. Find and add your integration
 
+**In the Notion integration configuration, ensure the integration has access to the workspace and only read permissions are granted for the content.** (Just so I don’t end up modifying things from Git and having it reflect in my Notion pages)
+
 ### 3. Get Your Database ID
 
 From your database URL:
