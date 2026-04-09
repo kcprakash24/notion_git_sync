@@ -67,6 +67,26 @@ def get_slug(page: dict) -> str:
         return rich[0]["plain_text"].strip()
     return slugify(get_title(page))
 
+def get_date(page: dict) -> str:
+    date_prop = page["properties"].get("Published Date", {})
+    date = date_prop.get("date", {})
+    if date and date.get("start"):
+        return date["start"]
+    return ""
+
+
+def get_tags(page: dict) -> list:
+    tags_prop = page["properties"].get("Tags", {})
+    options = tags_prop.get("multi_select", [])
+    return [opt["name"] for opt in options]
+
+
+def get_summary(page: dict) -> str:
+    summary_prop = page["properties"].get("Summary", {})
+    rich = summary_prop.get("rich_text", [])
+    if rich:
+        return rich[0]["plain_text"].strip()
+    return ""
 
 def block_to_md(block: dict, assets_dir: str = None) -> str:
 
@@ -179,9 +199,26 @@ def sync():
 
         assets_dir = os.path.join(folder, "assets")
         md = get_page_markdown(page["id"], assets_dir)
-        full_md = f"# {title}\n\n{md}"
 
-        with open(os.path.join(folder, "index.md"), "w", encoding="utf-8") as f:
+        date = get_date(page)
+        tags = get_tags(page)
+        summary = get_summary(page)
+
+        tags_str = ", ".join([f"'{t}'" for t in tags])
+        frontmatter = f"""---
+title: '{title}'
+date: '{date}'
+tags: [{tags_str}]
+draft: false
+summary: '{summary}'
+authors: ['default']
+layout: PostSimple
+---
+
+"""
+        full_md = frontmatter + md
+
+        with open(os.path.join(folder, "index.mdx"), "w", encoding="utf-8") as f:
             f.write(full_md)
 
         print(f"  ✓ {title}")
